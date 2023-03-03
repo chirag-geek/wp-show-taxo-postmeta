@@ -5,41 +5,41 @@ defined( 'ABSPATH' ) || exit;
 class WPDSP_Postmeta {
 
     function __construct() {
-        add_action( 'admin_menu', [$this, 'wpsdp_admin_taxo_menu_page'] );
-        add_action( 'init', [$this, 'wpsdp_save_form_info'] );
-        add_action( 'elementor_pro/forms/actions/after_run', [$this, 'wpsdp_callback_api_newsletter'] );
+        add_action( 'admin_menu', [$this, 'admin_taxo_menu_page'] );
+        add_action( 'init', [$this, 'save_form_info'] );
+        add_action( 'elementor_pro/forms/actions/after_run', [$this, 'callback_api_newsletter'] );
     }
 
     // Add the custom page to the admin menu
-    function wpsdp_admin_taxo_menu_page() {
+    function admin_taxo_menu_page() {
         add_menu_page(
             'WP Taxo Settings',
             'WP Taxo Settings',
             'manage_options', 
             'wpsdp-taxo-settings', 
-            [$this, 'wpsdp_callback_show_page_content']
+            [$this, 'callback_show_page_content']
         );
     }
 
-    public function wpsdp_callback_show_page_content() { 
+    public function callback_show_page_content() { 
     ?>
         <div class="wrap wpsdp-container">      
             <h1> <?php esc_html_e( 'Category and Tag Selection Page', 'wp-taxo-show-default-postmeta'); ?> </h1>
             <div class="content-area">
                 <form method="post" class="wpsdp-form">
-                    <input type="hidden" name="action" value="wpsdp-taxo-settings" />
-                    <?php $this->wpsdp_list_categories(); ?>
-                    <?php $this->wpsdp_list_post_tags(); ?>
+                    <?php $this->list_categories(); ?>
+                    <?php $this->list_post_tags(); ?>
                     <div class="wpsdp-form-submit">
                         <input type="submit" value="<?php echo esc_attr( 'Save' ); ?>" name="wpsdp_form_submit" class="wpsdp-form-btn" />
                     </div>
+                    <?php wp_nonce_field( 'wpdsp-taxo-action', 'wpdsp-form-nonce' ); ?>
                 </form>
             </div>
         </div>
     <?php    
     }
 
-    public function wpsdp_list_categories() {
+    public function list_categories() {
 
         $args = array(            
             'taxonomy' => 'category',
@@ -61,7 +61,7 @@ class WPDSP_Postmeta {
     <?php   
     }
     
-    public function wpsdp_list_post_tags() {
+    public function list_post_tags() {
 
         $args = array(            
             'taxonomy' => 'post_tag',
@@ -82,9 +82,9 @@ class WPDSP_Postmeta {
     <?php   
     }
     
-    function wpsdp_save_form_info() {
+    function save_form_info() {
 
-        if( isset( $_POST['wpsdp_form_submit'] ) ) {
+        if( isset( $_POST['wpsdp_form_submit'] ) && isset( $_POST['wpdsp-form-nonce'] ) && wp_verify_nonce( $_POST['wpdsp-form-nonce'], 'wpdsp-taxo-action' ) ) {
             
             $taxo['tags'] = $_POST['wpsdp_tags'];
             $taxo['cats'] = $_POST['wpsdp_cats'];            
@@ -97,7 +97,7 @@ class WPDSP_Postmeta {
         }
     }
 
-    function wpsdp_callback_api_newsletter() {
+    function callback_api_newsletter() {
         
         $post_id = get_the_ID();
         $settings = get_option('wpsdp_taxo_list');
@@ -110,9 +110,9 @@ class WPDSP_Postmeta {
             if ( !empty( $categories ) || !empty( $tags ) ) {
 
                 if ( in_category( $settings['cats'], $post_id ) || has_term( $settings['tags'], 'post_tag', $post_id ) ) {
-                    echo 'yes i have all things';
+                    // echo 'yes i have all things';
                 }else {
-                    echo 'NO i does not have all things';
+                    // echo 'NO i does not have all things';
                 }
             }
         }
