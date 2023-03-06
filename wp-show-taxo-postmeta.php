@@ -31,5 +31,15 @@ function wpsdp_plugin_admin_scripts(){
     wp_enqueue_script('wpsdp-admin-script', plugins_url() . '/' . basename(dirname(__FILE__)) . '/assets/js/wpsdp-admin-script.js', array( 'jquery' ), WPSDP_BUILD);
 }
 
+$plugin = plugin_basename( __FILE__ );
+add_filter( "plugin_action_links_$plugin", 'wpsdp_add_plugin_link');
+function wpsdp_add_plugin_link( $links ) {	
+	
+	$setting_link = '<a href="'. admin_url('admin.php?page=wpsdp-taxo-settings') .'">' . __( 'Settings', 'wp-taxo-show-default-postmeta' ) . '</a>';
+	array_unshift( $links, $setting_link );
+
+	return $links;
+}
+
 require_once( plugin_dir_path( __FILE__ ) . '/includes/wpsdp-postmeta.php' );
 $data = new WPDSP_Postmeta();
